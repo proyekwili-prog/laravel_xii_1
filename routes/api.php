@@ -1,5 +1,7 @@
 <?php
 use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\CategoryController;
 
-Route::get('/product', [ProductController::class, 'index']);
-Route::get('/product/{id}', [ProductController::class, 'show']);
+Route::apiResource('product',ProductController::class);
+Route::apiResource('categories',CategoryController::class);
+

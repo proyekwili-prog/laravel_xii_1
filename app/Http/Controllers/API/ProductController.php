@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 use App\Models\product;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -12,7 +13,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $data = product::all();
+        $data = product::with('category')->get();
         return response()->json($data);
     }
 
@@ -21,7 +22,27 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+    $validator = Validator::make($request->all(),[
+        "name" => "required|string|max:50",
+        "price" => "required|integer",
+        "stock" => "required|integer",
+        "description" => "required",
+        "category_id" => "required|exists:categories,id"
+    ]);
+
+    if($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ],);
+    }
+
+    $data = Product::create($validator->validated());
+    return response()->json([
+        'message' => "Data created succesfully",
+        'data' => $data
+    ]);
     }
 
     /**
@@ -45,6 +66,36 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        $product = Product::findOrFail($id);
+        if(!$product){
+            return response()->json([
+                "message" => "data not found"
+        ]);
+
+        }
+          $validator = Validator::make($request->all(),[
+        "name" => "required|string|max:50",
+        "price" => "required|integer",
+        "stock" => "required|integer",
+        "description" => "required",
+        "category_id" => "required|exists:categories,id"
+    ]);
+
+    if($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422
+        );
+    }
+
+
+
+    $product= Product::create($validator->validated());
+    return response()->json([
+        'message' => "Data created succesfully",
+        'data' => $product
+    ]);
     }
 
     /**
